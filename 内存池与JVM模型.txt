@@ -1,0 +1,163 @@
+JVM内存模型
+
+
+在JVM中是不存在这个实体的
+
+CHeapObj  ValueObj  AllStaticObj -----  hotspot源码中
+
+
+idae中启动一个类，点run()做了什么：
+	1.调用javac，将.java文件编译为.class文件
+	2.调用java命令，运行.class文件
+
+四个概念
+	class文件
+		硬盘上的.class文件
+	class content
+		类加载器将.class文件加载到内存
+		存储字节码文件数据的那块区域
+
+		steam()
+
+		ClassFileStream* cfs = steam();  hopspot源码
+		字节流
+
+		解析
+			InstanceKlass 类的元信息，存放在AppClassLoader类加载器区域
+
+			InstanceMirrorKlass   镜像类 堆区  静态变量也在这里
+	Class对象
+		Class clazz = Test.getClass();
+		在JVM中真正获取到的是InstanceMirrorKlass实例
+
+	对象
+		new()
+		反射
+
+
+方法区
+	永久代
+		jdk1.8之前的方法区的实现，在堆区
+
+	元空间
+		1.8以后方法区的实现，直接内存、OS内存
+
+		不做任何调优，最大是多少、最小是多少？
+		$ java -XX:+PrintFlagsFinal -version | grep Metaspace 查看
+		最小：21807104 20.75M
+		最大：4294901760 
+
+		调优：
+			-XX:MetaspaceSize
+			-XX:MaxMetaspaceSize
+
+			元空间如何调优：
+				-Xms
+				-Xmx
+				堆区的最大、最小调成一样大（为了防止内存抖动）
+
+				调成多少？ 物理内存的 1 / 32
+
+
+
+方法区是规范，永久代，元空间是具体实现
+
+JVM为什么用元空间取代了永久代？
+	1、方便gc算法
+	2、OOM  动态生成 cglib
+	3、硬件发展
+	4、字符串OOM
+		jdk6 字符串再永久代
+		jdk7以后才放在了堆区
+
+
+
+
+本地方法栈 ： java调用c++的动态链接库、运行里面的函数需要的栈，就是JNI（native方法）
+	随着socket的发展，JNI很少用了
+
+
+虚拟机栈：
+	一个JVM中有虚拟机栈 ？  1个线程对应一个虚拟机栈
+
+	一个虚拟机栈有多少栈帧？ 方法调用次数个
+
+	栈帧：
+		局部变量表
+
+		操作数栈
+
+		动态链接
+			main方法对应的JVM对象在元空间中的内存地址
+			虚表
+
+		返回地址
+
+程序计数器：
+	
+	字节码的索引
+
+	EIP
+	RIP
+
+public static void main (String[] args){
+	add();
+}
+
+public void add(){
+	int a = 1;
+	int b = 1;
+	sout(a+b);
+}
+
+JVM执行add方法，底层是怎么做的
+1、创建add方法的栈帧
+2、在add方法的栈帧中保存main方法的字节码的下一行的程序计数器
+3、线程的局部表开始指针（main的）
+4、线程的操作数栈的开始指针（main的）
+5、将add方法的局部表指针赋值给线程的局部表指针
+6、将add方法的操作数栈指针赋值给线程的操作数栈指针
+
+
+局部变量表：
+	存放局部变量的表
+
+
+0 new #2 <com/luban/entity/ListNode>
+	1、在堆区生成了一个对象（不完全对象，未执行构造方法）
+		InstanceOopDesc
+	2、将不完全对象的指针压入栈
+3 dup		duplicate复制
+	1、复制栈顶元素
+	2、压入栈
+
+	为什么要有dup这步操作？
+		将对象指针作为this进行传参
+4 invokespecial #3 <com/luban/entity/ListNode.<init>>
+	非静态方法，第一个参数就是this指针
+	1、执行invokespecial字节码指令完成运行方法的环境构建 this指针赋值
+	这段字节码执行完，这个对象就是完全对象了
+7 astore_1
+	1、将栈顶元素pop
+	2、将完全对象的地址赋值给局部变量表index=1的位置
+
+
+堆区：
+	新生代： 1/ 3
+		Eden区 + from区+ to区
+	老年代： 2/3
+	
+	最小： 物理内存的 1 / 64
+	最大： 物理内存的 1 /  4
+
+-Xms
+-Xmx 
+	调成一样大
+
+什么对象会进入老年代？
+	1、15次gc仍然存活的对象
+	2、大对象：对象大小超过Eden区的一半
+	3、空间担保
+		针对Eden区
+	4、动态年龄判断
+

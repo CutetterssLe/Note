@@ -1,0 +1,48 @@
+类加载过程：
+	1、加载(重点)
+		1、通过类的全限定名获取到该类的class文件
+		2、解析成运行时数据，即instanceKlass，放在方法区
+		3、在堆区生成该类的class对象，即instanceMirrorKlass实例
+	2、验证
+	3、准备
+		赋初值 int = 0 long = 0L
+		final修饰的会给属性添加ConstantValue， 直接赋值，没有赋初值一说
+	4、解析
+
+		间接引用（指向运行时常量池的引用） ---> 直接引用 （内存地址）
+	5、初始化（重点）
+
+		类何时初始化，jvm类加载属于懒加载
+
+		执行静态代码块，完成静态变量的赋值
+
+		静态字段，静态代码段，字节码层面会生成clinit方法，方法中语句的先后顺序与代码的顺序有关
+	6、使用
+	7、卸载
+
+oop-klass
+
+普通Java类（非数组）在hotspot存储为instanceKlass实例： .class文件，类的元信息
+
+	InstanceKlass子类：
+		InstanceMirrorKlass（静态类）：
+			java.lang.Class
+			Class对象，堆区
+
+		InstanceRefKlass：
+			java.lang.ref.Reference子类
+
+		InstanceClassLoaderKlass：
+			用来遍历某个加载器的类
+
+	ArrayKlass： 存储数组类的元信息
+
+		java中的数组是动态数据类型，运行期生成
+
+		newarray ： 创建基本类型的数组
+			TypeArrayKlass
+
+		anewarray： 创建引用类型的数组
+			ObjArrayKlass
+
+静态属性存储在镜像类中的

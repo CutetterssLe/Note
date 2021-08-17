@@ -1,0 +1,36 @@
+常量池
+	1、class文件中的
+		硬盘上
+	2、运行时常量池 （我们一般说的常量池）
+		InstanceKlass的一个属性
+		ConstantPool* _constants
+		方法区（元空间）
+	3、字符串常量池
+		StringPool
+		StringTable
+		HashTable
+
+String s = "11";
+创建了几个对象 ？
+	创建了1个String对象 || 2个OOP desc对象，一个string对应的InstanceOop，一个char[]
+
+String s1 = "22";
+String s2 = "22";
+创建了几个对象 ？
+	创建了1个String对象 || 2个OOP desc对象，一个string对应的InstanceOop，一个char[]
+
+String s1 = "21";
+String s2 = "22";
+创建了几个对象 ？
+	2个String 、 4个oop
+
+String s1 = new String("3");
+创建了几个对象 ？
+	2个String、 2个oop
+
+String s1 = "1";
+String s2 = "1";
+String s = s1+s2;
+创建了几个对象 ？
+	2个String
+	4个oop

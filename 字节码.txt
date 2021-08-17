@@ -1,0 +1,28 @@
+.class文件
+
+魔数 u4（u4 表示占4个字节）：
+	ca fe ba be
+	判断一个文件是不是class文件，如果不是就不执行
+次版本号 u2：
+	00 00
+	jdk1.8为0
+主版本号 u2：
+	00 34
+	十进制为52
+	jdk1.8为52
+常量池个数 u2：
+	00 19
+	0x19
+	25个
+	真实的个数 = 字节码文件中的常量池个数 - 1
+	常量池最小的index是1，不是0
+解析常量池 ！ 表示不确定占用多少字节：
+	第一个元素 ：
+		tag：0a 对应CONSTANT_Methodref_info
+		class_index： 00 04  解析时不知道是什么，才有符号引用转直接引用
+		name_and_type_index：00 15
+	第二个元素 ：
+		tag: 09 对应CONSTANT_Fieldref_info
+		class_index： 00 03
+		name_and_type_index：00 16
+

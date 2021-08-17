@@ -1,0 +1,61 @@
+类初始化阶段，JVM底层会加锁，加锁对象为ObjectLocker，C++的一个对象
+
+JVM会先判断是否加载，然后才会有初始化
+
+public class yzz {
+    public static void main(String[] args){
+        System.out.println(B.str);
+    }
+
+}
+
+class A {
+    protected static String str = "A str";
+
+    static {
+        System.out.println("AAAAA");
+    }
+}
+
+
+class B extends A{
+    static {
+        str = "asdf";
+
+        System.out.println("BBBBBBB");
+    }
+}
+
+加载B的时候一定会去加载A，JVM判断已经不需要加载B类，B类不会被加载
+
+启动类加载器 Bootstrap ClassLoader
+
+main函数所在的类是应用类加载器 AppClassLoader
+
+线程上下文类加载器是在checkAndLoadMain()时候设置的
+Thread.currentThread().setContextClassLoader(classloader);
+
+不同的加载器加载同一个类， 不相等，空间不一样
+
+方法区
+	每个类加载器在方法区都有一块独立的区域，按照类加载器进行分开存储的
+
+双亲委派：
+	效率
+	安全
+	提供了扩展性
+双亲委派局限性:
+	无法做到不委派
+	无法向下委派
+
+Driver接口是用启动类加载器加载的，在rt.jar里面
+
+	mysql的Driver相关实现类，是用AppClassLoader加载的，需要向下委派才能加载，SPI机制
+
+打破双亲委派：
+	自定义类加载器
+	SPI机制
+1:42:27
+
+自定义类加载器
+	如何实现：继承ClassLoader类，重写findClass方法
