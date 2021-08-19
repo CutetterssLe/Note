@@ -16,7 +16,7 @@
 ---
 ## 2、集群容错 ##
     在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
-![cluster.jpg](cluster.jpg)
+![cluster.jpg](../image/cluster.jpg)
 - 这里的 Invoker 是 Provider 的一个可调用 Service 的抽象，Invoker 封装了 Provider 地址及 Service 接口信息
 - Directory 代表多个 Invoker，可以把它看成 List<Invoker> ，但与 List 不同的是，它的值可能是动态变化的，比如注册中心推送变更
 - Cluster 将 Directory 中的多个 Invoker 伪装成一个 Invoker，对上层透明，伪装过程包含了容错逻辑，调用失败后，重试另一个
@@ -112,12 +112,116 @@
         <dubbo:reference interface="...">
             <dubbo:method name="..." loadbalance="roundrobin"/>
         </dubbo:reference>
-## 4、本地调用 ##
+## 4、服务超时 ##
 
+    客户端配置timeout = 3000， 服务端配置timeout = 6000， 服务执行5秒钟，客户端报timeoutexception，服务端无报错
 ## 5、本地伪装 ##
 
 ## 6、本地存根 ##
 
 ## 7、泛化调用 ##
+
+## 8、参数回调 ##
+
+## 9、SPI机制 ##
+-   在需要使用SPI的Service上面加注解@SPI，并在resources/META-INF/dubbo新建接口全限定名文件，并配置key = 实现类全限定名，使用如下方法去获取：
+
+        ExtensionLoader<Person> extensionLoader = ExtensionLoader.getExtensionLoader(Person.class);
+        Person person = extensionLoader.getExtension("key");
+        System.out.println(person);
+-   提供类似IOC、AOP功能
+  
+        public interface Car {
+            public String getName();
+        }
+
+        public class RedCar implements Car{
+            @Override
+            public String getName() {
+                return "red";
+            }
+        }
+
+        public class CarWrapper implements Car{
+
+            private Car car;
+
+            public CarWrapper(Car car) {
+                this.car = car;
+            }
+            @Override
+            public String getName() {
+                return "wrapper";
+            }
+        }
+
+    配置文件：
+
+        black = com.xx.BlackCar
+        com.xx.CarWrapper
+
+    通过extensionLoader.getExtension("key")这个时候拿出来的对象其实是Wrapper对象，我们可以对Car做一个包装，dosomething
+-   源码解析
+
+    ExtensionLoader<Person> extensionLoader = ExtensionLoader.getExtensionLoader(Person.class);
+
+
+        public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
+                // 前面都是一些校验
+            if (type == null)
+                throw new IllegalArgumentException("Extension type == null");
+            if (!type.isInterface()) {
+                throw new IllegalArgumentException("Extension type(" + type + ") is not interface!");
+            }
+            if (!withExtensionAnnotation(type)) {
+                throw new IllegalArgumentException("Extension type(" + type +
+                        ") is not extension, because WITHOUT @" + SPI.class.getSimpleName() + " Annotation!");
+            }
+            //EXTENSION_LOADERS  
+            private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?ExtensionLoader<?>>();
+            //从map中获取一个type类型的
+            ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
+            if (loader == null) {
+                EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<T>(type));
+                loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
+            }
+            return loader;
+        }
+    Person person = extensionLoader.getExtension("key");
+
+        public T getExtension(String name) {
+            if (name == null || name.length() == 0)
+                throw new IllegalArgumentException("Extension name == null");
+            //如果name = true，就会获取默认实现，就是@SPI注解后面的参数，例如@SPI("black")，默认获取blackCar
+            if ("true".equals(name)) {
+                return getDefaultExtension();
+            }
+            //Holder主要是解决并发问题
+            Holder<Object> holder = cachedInstances.get(name);
+            if (holder == null) {
+                cachedInstances.putIfAbsent(name, new Holder<Object>());
+                holder = cachedInstances.get(name);
+            }
+            //如果有2个线程同时进来获取，只有一个线程会创建
+            Object instance = holder.get();
+            if (instance == null) {
+                //使用holder作为锁
+                synchronized (holder) {
+                    instance = holder.get();
+                    if (instance == null) {
+                        //创建扩展点实例对象，步骤：
+                        1、直接从缓存中获取对应class实例
+                        2、如果获取不到，使用双重检查锁，加载解析配置类
+                            getExtensionClasses() -> loadExtensionClasses()，这一步会把默认扩展类进行缓存，方便后面使用
+                        3、进行依赖注入IOC injectExtension(instance);
+                        4、AOP Set<Class<?>> wrapperClasses = cachedWrapperClasses;
+                        instance = createExtension(name);
+                        holder.set(instance);
+                    }
+                }
+            }
+            return (T) instance;
+        }
+
 
 
