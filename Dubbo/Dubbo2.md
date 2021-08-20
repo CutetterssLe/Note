@@ -235,6 +235,7 @@
             }
             return (T) instance;
         }
+如果在指定的别的类里面需要注入Car，需要生成一个Car代理对象，给Car的getName方法上面加@Adaptive注解，参数需要有一个URL对象（或者参数对象有个方法叫getUrl），Dubbo会拼装出一个代理类，如果Car接口内有方法没加注解，生成的代理类调用这个方法会直接抛异常UnsupportedOperationException，方法不是Adaptive方法。
 
 
 
