@@ -137,6 +137,33 @@
 ## 8、参数回调 ##
 
 ## 9、SPI机制 ##
+![dubbo spi机制图](../image/Dubbo%20SPI架构图.png)
+
+-   在ExtensionLoader中除开有上文的static的Map外，还有两个非常重要的属性：
+
+        1、Class<?> type：表示当前ExtensionLoader实例是哪个接口的扩展点加载器
+        2、ExtensionFactory objectFactory：扩展点工厂（对象工厂），可以获得某个对象
+-   ExtensionLoader和ExtensionFactory的区别在于：
+
+        1、ExtensionLoader最终所得到的对象是Dubbo SPI机制产生的
+        2、ExtensionFactory最终所得到的对象可能是Dubbo SPI机制所产生的，也可能是从Spring容器中所获得的对象（获取对象时会循环遍历，先查找Spring中的，如果没找到再去Dubbo SPI Factory中找）
+-   在ExtensionLoader中有三个常用的方法：
+
+        1、getExtension("dubbo")：表示获取名字为dubbo的扩展点实例
+        2、getAdaptiveExtension()：表示获取一个自适应的扩展点实例
+        3、getActivateExtension(URL url, String[] values, String group)：表示一个可以被url激活的扩展点实例
+    自适应扩展点实例？它其实就是当前这个接口的一个代理对象。
+-   Dubbo中的IOC
+
+        1、根据当前实例的类，找到这个类中的setter方法，进行依赖注入
+        2、先分析出setter方法的参数类型pt
+        3、在截取出setter方法所对应的属性名property
+        4、调用objectFactory.getExtension(pt, property)得到一个对象，这里就会从Spring容器或通过DubboSpi机制得到一个对象，比较特殊的是，如果是通过DubboSpi机制得到的对象，是pt这个类型的一个自适应对象(代理对象)。
+        5、再反射调用setter方法进行注入
+-   Dubbo中的AOP
+
+        dubbo中也实现了一套非常简单的AOP，就是利用Wrapper，如果一个接口的扩展点中包含了多个Wrapper类，那么在实例化完某个扩展点后，就会利用这些Wrapper类对这个实例进行包裹，比如：现在有一个DubboProtocol的实例，同时对于Protocol这个接口还有很多的Wrapper，比如ProtocolFilterWrapper、ProtocolListenerWrapper，那么，当对DubboProtocol的实例完成了IOC之后，就会先调用new ProtocolFilterWrapper(DubboProtocol实例)生成一个新的Protocol的实例，再对此实例进行IOC，完了之后，会再调用new ProtocolListenerWrapper(ProtocolFilterWrapper实例)生成一个新的Protocol的实例，然后进行IOC，从而完成DubboProtocol实例的AOP。
+
 -   在需要使用SPI的Service上面加注解@SPI，并在resources/META-INF/dubbo新建接口全限定名文件，并配置key = 实现类全限定名，使用如下方法去获取：
 
         ExtensionLoader<Person> extensionLoader = ExtensionLoader.getExtensionLoader(Person.class);
