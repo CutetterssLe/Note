@@ -89,7 +89,31 @@
         }
     
     最终将生成的这些完整类路径的自动配置类放入BeanDefinitionMap中，进行后续的spring生命周期
-# 3、总结
+# 3、Java -jar xxxx.jar运行原理
+依赖于pom.xml中：
+
+        <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+        <plugin>
+打包完jar包结构：
+![jbjg](../image/jar包结构.png)
+由JarLauncher去加载META-INF中的文件，MEAT-INF内容：
+
+        Manifest-Version: 1.0
+        Implementation-Title: ralph
+        Implementation-Version: 0.0.2-SNAPSHOT
+        Start-Class: com.ezhiyang.ralph.RalphApplication
+        Spring-Boot-Classes: BOOT-INF/classes/
+        Spring-Boot-Lib: BOOT-INF/lib/
+        Build-Jdk-Spec: 1.8
+        Spring-Boot-Version: 2.2.5.RELEASE
+        Created-By: Maven Archiver 3.4.0
+        Main-Class: org.springframework.boot.loader.JarLauncher
+运行Start-Class
+
+
+# 4、总结
 
     SpringBoot应用启动的时候，会使用@EnableAutoConfigutaion注解 ---> @Import导入一个AutoConfigurationImportSelector，该类实现了DeferredImportSelector和一些感知类型接口，重写了DeferredImportSelector中的selectImports方法和getImportGroup方法(    返回AutoConfigurationGroup类，回去调用AutoConfigurationGroup的process方法来，调用getAutoConfigurationEntry获取自动配置类并放入缓存中) ， getAutoConfigurationEntry方法主要做了一下几件事情：
         1、通过SpringFactoriesLoader.loadFactoryNames去加载所有META-INF/spring.factories key为EnableAutoConfiguration的类
