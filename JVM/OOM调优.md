@@ -1,3 +1,7 @@
+- [1、TLAB](#1tlab)
+  - [1.1、为什么引入TLAB](#11为什么引入tlab)
+  - [1.2、TLAB是什么](#12tlab是什么)
+- [2、PLAB](#2plab)
 # 1、TLAB
 TLAB，即Thread Local Alloc Buffer，是线程的一块私有内存。关于TLAB，你是不是有很多问号？比如：为什么要引入TLAB技术、TLAB解决了什么问题、TLAB占多大内存、什么样的对象能在TLAB中分配……
 ## 1.1、为什么引入TLAB
@@ -52,3 +56,4 @@ TLAB是在创建Java线程的时候初始化的
         }    
 # 2、PLAB
 在老年代中分配的一块线程私有的内存，即promotion LAB。
+

@@ -1,3 +1,8 @@
+- [1、什么是Zookeeper](#1什么是zookeeper)
+- [2、Zookeeper架构](#2zookeeper架构)
+- [3、Zookeeer工作原理](#3zookeeer工作原理)
+- [4、Zookeeper设计原理](#4zookeeper设计原理)
+
 # 1、什么是Zookeeper
 - Zookeeper是一个分布式、开元的分布式应用程序协调服务，是Google的Chubby的一个开元的实现，它是集群的管理者，监视着集群中各个节点的状态，根据节点提交的反馈进行下一步合理的操作。最终，将简单易用的接口和性能高效、功能稳定的系统提供给用户。
 - Zookeeper一个最常用的场景就是作为服务提供者和消费者的注册中心，服务生产者将自己提供的服务注册到Zookeeper，服务消费者在进行服务调用时先到Zookeeper中查找服务，获取到服务生产者的信息之后在发起调用。
@@ -28,4 +33,5 @@ ZooKeeper 的架构图中我们需要了解和掌握的主要有：
   - LEADING：当前Server即为选举出来的leader。
   - FOLLOWING：leader已经选举出来，当前Server与之同步。
 # 4、Zookeeper设计原理
+
 

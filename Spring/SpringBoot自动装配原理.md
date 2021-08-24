@@ -1,3 +1,9 @@
+
+- [1、什么是SpringBoot自动装配](#1什么是springboot自动装配)
+- [2、SpringBoot 是如何实现自动装配的？](#2springboot-是如何实现自动装配的)
+- [3、Java -jar xxxx.jar运行原理](#3java--jar-xxxxjar运行原理)
+- [4、总结](#4总结)
+
 # 1、什么是SpringBoot自动装配
 
 我们现在提到自动装配的时候，一般会和 Spring Boot 联系在一起。但是，实际上 Spring Framework 早就实现了这个功能。Spring Boot 只是在其基础上，通过 SPI 的方式，做了进一步优化。
@@ -110,7 +116,7 @@
         Spring-Boot-Version: 2.2.5.RELEASE
         Created-By: Maven Archiver 3.4.0
         Main-Class: org.springframework.boot.loader.JarLauncher
-运行Start-Class，
+运行Start-Class，加载器为
 
 
 # 4、总结
