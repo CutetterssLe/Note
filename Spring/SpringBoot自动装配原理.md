@@ -104,7 +104,7 @@
         <plugin>
 打包完jar包结构：
 ![jbjg](../image/jar包结构.png)
-由JarLauncher去加载META-INF中的文件，MEAT-INF内容：
+由JarLauncher去加载META-INF中MANIFEST.MF的文件，MANIFEST.MF内容：
 
         Manifest-Version: 1.0
         Implementation-Title: ralph
@@ -116,7 +116,7 @@
         Spring-Boot-Version: 2.2.5.RELEASE
         Created-By: Maven Archiver 3.4.0
         Main-Class: org.springframework.boot.loader.JarLauncher
-运行Start-Class，加载器为
+运行Start-Class
 
 
 # 4、总结
