@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <head>
+            <style>
+                .box {
+                    text-align: center;
+                    border-radius: 5px;
+                    box-shadow: 2px 2px 2px #ccc;
+                }
+                .header {
+                    color: red;
+                    font-family:monospace;
+                    text-align: center;
+                }
+                ul {
+                    list-style: none;
+                    display: flex; /* 将ul元素的display设置为flex布局 */
+                    justify-content: space-between; /* 空白处对齐 */
+                    align-items: center; /* 垂直居中 */
+                }
+                li {
+                    width: 100px;
+                    text-align: center;
+                }
+                .active {
+                    color: #fff;
+                    background-color: red;
+                    
+                }
+                td {
+                    text-align: center;
+                }
+                .red {
+                    color: red;
+                }
+            </style>
+        </head>
+    <div id = "app">
+      <div style="float: left">
+        <table border="1" width="600" align="center">
+          <thead>
+              <tr>
+                  <th>编号</th>
+                  <th>科目</th>
+                  <th>成绩</th>
+                  <th>操作</th>
+              </tr>
+          </thead>
+          <tbody v-if="list.length > 0">
+              <tr v-for="(item, index) in list" :key="item.id">
+                  <td>{{index + 1}}</td>
+                  <td>{{item.name}}</td>
+                  <td :class="{red : item.score < 60}">{{item.score}}</td>
+                  <td><a href="#" @click.prevent="del(item.id)">删除</a></td>
+              </tr>
+          </tbody>
+          <tbody v-if="list.length === 0">
+            <tr>
+                <td colspan="5" height="100px" align="center">
+                    <a style="color: gray;">暂无数据</a>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <td colspan="5" align="center">
+                总分：{{ totalScore }} &nbsp; &nbsp; &nbsp;  平均分：{{ avgScore }}
+            </td>
+        </tfoot>
+        </table>
+      </div>
+      <div style="float: left">
+          科目：
+          <input type="text" placeholder="请输入科目" style="height: 25px" v-model="name">
+          <br/>
+          <br/>
+          
+          分数：
+          <input type="text" placeholder="请输入分数" style="height: 25px" v-model.number="score">
+          <br/>
+          <br/>
+          <button style="float: right" @click="add(name,score)">添加</button>
+
+          输入翻译<input type="text" v-model="words"> <button @click="translate(words)">翻译</button>
+
+          翻译后的结果是：<label v-show="tValue != '' ">{{ tValue }}</label>
+      </div>
+    </div>
+    <script src="../vue.js"></script>
+    <script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+              list:[
+                  {id:1, name:'语文', score:83},
+                  {id:2, name:'数学', score:34},
+                  {id:3, name:'英语', score:43}
+              ],
+              name:'',
+              score:'',
+              words:'',
+              tValue:''
+            },
+            methods: {
+                del(id) {
+                    this.list = this.list.filter((item) => item.id != id)
+                },
+                add(name, score){
+                    let temp = {id:+new Date(), name:name, score:score};
+                    this.list.push(temp);
+                    this.name='';
+                    this.score='';
+                },
+                async translate(words) {
+                    const res = await axios({
+                        url:'https://applet-base-api-t.itheima.net/api/translate',
+                        params: {
+                            words: words
+                        }
+                    });
+                    this.tValue = res.data.data
+                }
+            },
+            computed: {
+                totalScore(){
+                    let total = this.list.reduce((sum, item) => sum + item.score, 0);
+                    return total;
+                },
+                avgScore(){
+                    if (this.list.length == 0) {
+                        return 0;
+                    }
+                    let avg = (this.totalScore / this.list.length).toFixed(1);
+                    return avg;
+                }
+            },
+            beforeCreate(){
+                alert("响应式数据准备之前")
+            },
+            created(){
+                alert("数据准备好之后")
+            },
+            beforeMount(){
+                alert("挂载前")
+            },
+            mounted(){
+                alert("挂载后")
+            }
+        })
+    </script>
+    </body>
+    
+</html>

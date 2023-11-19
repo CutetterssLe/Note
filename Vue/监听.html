@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <head>
+            <style>
+                .box {
+                    text-align: center;
+                    border-radius: 5px;
+                    box-shadow: 2px 2px 2px #ccc;
+                }
+                .header {
+                    color: red;
+                    font-family:monospace;
+                    text-align: center;
+                }
+            </style>
+        </head>
+    <div id = "app">
+        <input type="text" v-model="obj.words">
+        <input type="text" v-model="obj.lang">
+    </div>
+    <script src="../vue.js"></script>
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+                obj: {
+                    words:'',
+                    lang:'italy'
+                }
+            },
+            methods: {
+               
+            },
+            watch: {
+                obj: {
+                    deep: true,// 深度监视
+                    immediate: true, // 进页面触发
+                    handler(newValue) {
+                        clearTimeout(this.timer);
+                        this.timer = setTimeout( () => {
+                            alert('新改动：' + this.obj.words + '----' + this.obj.lang)
+                        }, 300);
+                    }
+                }
+            } 
+        })
+    </script>
+    </body>
+    
+</html>

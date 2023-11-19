@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <head>
+            <style>
+                .box {
+                    text-align: center;
+                    border-radius: 5px;
+                    box-shadow: 2px 2px 2px #ccc;
+                }
+                .header {
+                    color: red;
+                    font-family:monospace;
+                    text-align: center;
+                }
+            </style>
+        </head>
+    <div id = "app">
+       <header>
+           <h1>小黑记事本</h1>
+           <input placeholder="请输入任务" v-model="todoName" />
+           <button @click="submitTask(todoName)">提交任务</button>
+       </header>
+       <section>
+           <ul>
+               <li v-for="(item, index) in list" :key="item.id">
+                   {{index + 1}} .  {{item.name}}
+                   <button @click="deleteTask(index)">删除任务</button>
+               </li>
+               
+           </ul>
+           <span>
+               <label>合计：</label> <strong>{{ list.length }}</strong>
+           </span>
+           <span>
+               <button @click="reset" v-show="list.length > 0">清空任务</button>
+           </span>
+       </section>
+    </div>
+    <script src="vue.js"></script>
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+                todoName:'',
+                list:[
+                    {id:1, name:'打篮球'},
+                    {id:2, name:'打足球'}
+               ]
+            },
+            methods: {
+                submitTask(todoName) {
+                    if (todoName.trim() === ''){
+                        alert('请输入正确的任务名');
+                        return;
+                    }
+                    let temp = {id: +new Date(), name:todoName}
+                    this.list.push(temp)
+                    this.todoName = ''
+                },
+
+                deleteTask(index) {
+                    this.list.splice(index, 1)
+                },
+                reset(){
+                    this.list = []
+                }
+            } 
+        })
+    </script>
+    </body>
+    
+</html>

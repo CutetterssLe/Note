@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <head>
+            <style>
+                .box {
+                    text-align: center;
+                    border-radius: 5px;
+                    box-shadow: 2px 2px 2px #ccc;
+                }
+                .header {
+                    color: red;
+                    font-family:monospace;
+                    text-align: center;
+                }
+                ul {
+                    list-style: none;
+                    display: flex; /* 将ul元素的display设置为flex布局 */
+                    justify-content: space-between; /* 空白处对齐 */
+                    align-items: center; /* 垂直居中 */
+                }
+                li {
+                    width: 100px;
+                    text-align: center;
+                }
+                .active {
+                    color: #fff;
+                    background-color: red;
+                    
+                }
+                /* td {
+                    text-align: center;
+                } */
+                .red {
+                    color: red;
+                }
+            </style>
+        </head>
+    <div id = "app">
+        <div style="text-align: center;">
+            <input type="text" v-model="name" placeholder="请输入名称">
+            <input type="text" v-model.number="price" placeholder="请输入价格">
+            <span><button @click="add">添加账单</button></span>
+        </div>
+        <br>
+        <br>
+        <table border="1" width="600">
+            <tr>
+                <th>编号</th>
+                <th>名称</th>
+                <th>价格</th>
+                <th>操作</th>
+            </tr>
+            <tr v-for="(item, index) in list" :key="item.id">
+                <td style="text-align: center;">{{ index + 1 }}</td>
+                <td style="text-align: center;">{{item.name}}</td>
+                <td style="text-align: center;">{{item.price.toFixed(2)}}</td>
+                <td style="text-align: center;"><a href="#" @click.prevent="del(item.id)">删除</a></td>
+            </tr>
+            <br>
+            <tr>
+                <td colspan="4">消费总计：{{totalPrice.toFixed(2)}}</td>
+            </tr>
+        </table>
+        <div>
+        <div id = "main" style="width: 600px; height: 400px;">
+
+        </div>
+            
+        </div>
+
+        
+    </div>
+    <script src="../vue.js"></script>
+    <script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+              list: [],
+              name:'',
+              price:'' 
+            },
+            methods: {
+                async getList(){
+                    const res = await axios.get('https://applet-base-api-t.itheima.net/bill', {
+                        params: {
+                            creator:'小黑'
+                        }
+                    })
+                    this.list = res.data.data
+                    let opt = {
+                        series: [
+                            {
+                                data: this.list.map(item => ({value: item.price, name: item.name}))
+                            }
+                            
+                        ]
+                    }
+                    this.myChart.setOption(opt)
+                },
+                async add () {
+                    if(!this.name) {
+                        alert('输入正确的名字')
+                        return
+                    }
+                    if(!this.price) {
+                        alert('输入正确的价格')
+                        return
+                    }
+                    const res = await axios.post('https://applet-base-api-t.itheima.net/bill', {
+                        creator: '小黑',
+                        name: this.name,
+                        price: this.price
+                    })
+                    this.name = ''
+                    this.price = null
+                    this.getList()
+                }
+            },
+            computed: {
+               totalPrice(){
+                   return this.list.reduce((sum, item) => sum + item.price, 0)
+               }
+            },
+            
+            mounted(){
+                var chartDom = document.getElementById('main');
+                 this.myChart = echarts.init(chartDom);
+              let options = {
+                    title: {
+                        text: '消费账单',
+                        subtext: '二级小菜单',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left'
+                    },
+                    series: [
+                        {
+                        name: '鼠标移上去显示的小标题',
+                        type: 'pie',
+                        radius: '50%',
+                        data: [
+                            { value: 1048, name: 'Search Engine' },
+                            { value: 735, name: 'Direct' },
+                            { value: 580, name: 'Email' },
+                            { value: 484, name: 'Union Ads' },
+                            { value: 300, name: 'Video Ads' }
+                        ],
+                        emphasis: {
+                            itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                        }
+                    ]
+                    };
+                    options && this.myChart.setOption(options)
+            },
+            created(){
+                this.getList()
+            }
+        })
+    </script>
+    </body>
+    
+</html>
